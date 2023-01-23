@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+{% load static %}
+<html>
+
+<head>
+    <title>Page title</title>
+    <link rel="stylesheet" type="text/css" media="screen" href="{% static 'main.css' %}">
+</head>
+
+<body>
+    <section class="main--container">
+        <form id="post_form">
+            <input type="text" name="body" />
+        </form>
+
+
+        <div id="post__list">
+            {% for post in posts %}
+            <div class="post-wrapper">
+                <strong>Posted {{post.created|timesince}} ago</strong>
+                <p>{{post.body}}</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</body>
+<script type="text/javascript">
+    let form = document.getElementById('post_form')
+    form.addEventListener('submit', (e) => {
+        e.preventDefault()
+        let bodyText = e.target.body.value
+        console.log(bodyText)
+        form.reset()
+
+        submitData(bodyText)
+    })
+
+    let submitData = async (bodyText) => {
+        let response = await fetch('/add/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ 'body': bodyText })
+        })
+        let data = await response.json()
+        console.log('Data:', data)
+        addMessageToDom(data)
+    }
+
+    let addMessageToDom = async (message) => {
+        let postList = document.getElementById('post__list')
+        let postWrapper = `<div class="post-wrapper">
+            <strong> Posted ${message.created} ago</strong>
+                <p>${message.body}</p>
+                <hr>
+    </div>`
+        postList.insertAdjacentHTML('afterbegin', postWrapper)
+    }
+</script>
+
+</html>
